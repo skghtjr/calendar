@@ -20,6 +20,8 @@ public interface CalendarService {
     
     public void deleteAllUsers();
     
+    public List<CalendarUser> getAlluser();
+    
     /* Event */
     public Event getEvent(int eventId);
 
@@ -35,6 +37,8 @@ public interface CalendarService {
     public List<EventAttendee> getEventAttendeeByEventId(int eventId);
     
     public List<EventAttendee> getEventAttendeeByAttendeeId(int attendeeId);
+    
+    public List<EventAttendee> getAllEventAttendee();
 
     public int createEventAttendee(EventAttendee eventAttendee);
 

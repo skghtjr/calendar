@@ -61,6 +61,11 @@ public class DefaultCalendarService implements CalendarService {
 	public void deleteAllUsers() {
 		userDao.deleteAll();
 	}
+	
+	@Override
+	public List<CalendarUser> getAlluser() {
+		return userDao.findAllusers();
+	}
 
 
 
@@ -105,6 +110,11 @@ public class DefaultCalendarService implements CalendarService {
 		return eventAttendeeDao.findEventAttendeeByAttendeeId(attendeeId);
 	}
 
+	@Override
+	public List<EventAttendee> getAllEventAttendee(){
+		return eventAttendeeDao.findAllEventAttendee();
+	}
+	
 	@Override
 	public int createEventAttendee(EventAttendee eventAttendee) {
 		return eventAttendeeDao.createEventAttendee(eventAttendee);

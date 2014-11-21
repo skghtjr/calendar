@@ -10,6 +10,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -49,13 +50,26 @@ public class JdbcCalendarUserDao implements CalendarUserDao {
 	@Override
 	public CalendarUser findUser(int id){
 		String sql_query = "select * from calendar_users where id = ?";
+		try {
 		return this.jdbcTemplate.queryForObject(sql_query, new Object[] {id}, rowMapper);
+	}catch (EmptyResultDataAccessException e) {
+
+		return null;
+	}
+
 	}
 
 	@Override
 	public CalendarUser findUserByEmail(String email) {
 		String sql_query = "select * from calendar_users where email = ?";
+		try {
 		return this.jdbcTemplate.queryForObject(sql_query, new Object[] {email}, rowMapper);
+		}catch (EmptyResultDataAccessException e) {
+
+			return null;
+
+		}
+
 	}
 
 	@Override
