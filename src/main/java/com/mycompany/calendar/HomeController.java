@@ -1,60 +1,92 @@
 package com.mycompany.calendar;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.mycompany.calendar.domain.CalendarUser;
-import com.mycompany.calendar.domain.Event;
-import com.mycompany.calendar.domain.EventAttendee;
 import com.mycompany.calendar.service.CalendarService;
+
 
 /**
  * Handles requests for the application home page.
  */
 @Controller
 public class HomeController {
-	
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
-	
 	@Autowired
-	CalendarService calendarservice;
-	
+	private CalendarService calendarService;	
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
+	public ModelAndView index(Locale locale, ModelAndView mav) {
 		
-		CalendarUser user = new CalendarUser();
-		Event event =  new Event();
-		EventAttendee attendee = new EventAttendee();
-		List<CalendarUser> users;
-		List<Event> events;
-		List<EventAttendee> attendees;
-		users = this.calendarservice.getAlluser();
-		events = this.calendarservice.getAllEvents();
-		attendees = this.calendarservice.getAllEventAttendee();
-		model.addAttribute("user", user );
-		model.addAttribute("users", users );
-		model.addAttribute("event", event );
-		model.addAttribute("events", events );
-		model.addAttribute("attendee", attendee );
-		model.addAttribute("attendees", attendees );
-
-		
-		return "home";
+		mav.addObject("message", "myCalendar 서비스에 오신 것을 환영합니다.");
+		mav.setViewName("index");
+		return mav;
 	}
 	
+	@RequestMapping(value = "users/signin", method = RequestMethod.GET)
+	public ModelAndView login(@RequestParam(value = "error", required = false) String error, @RequestParam(value = "logout", required = false) String logout) {
+	  ModelAndView model = new ModelAndView();
+	  if (error != null) {
+		model.addObject("error", "Invalid username and password!");
+	  }
+ 
+	  if (logout != null) {
+		model.addObject("msg", "You've been logged out successfully.");
+	  }
+	  model.setViewName("users/signin");
+ 
+	  return model;
+ 
+	}
+ 
+	//for 403 access denied page
+	@RequestMapping(value = "/403", method = RequestMethod.GET)
+	public ModelAndView accesssDenied(ModelAndView model) {
+	  //check if user is login
+	  Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	  
+	  if (!(auth instanceof AnonymousAuthenticationToken)) {
+		UserDetails userDetail = (UserDetails) auth.getPrincipal();	
+		model.addObject("username", userDetail.getUsername());
+	  }
+ 
+	  model.setViewName("403");
+	  return model;
+ 	}
+	
+	@RequestMapping(value = "/users/signup", method = RequestMethod.GET)
+    public String viewRegistration(Model model) {
+        CalendarUser userForm = new CalendarUser();    
+        model.addAttribute("userForm", userForm);
+         
+        return "users/signup";
+    }
+     
+    @RequestMapping(value = "/users/signup", method = RequestMethod.POST)
+    public String processRegistration(@ModelAttribute("userForm") CalendarUser user, Model model) {
+        
+    	this.calendarService.createUser(user);
+        // for testing purpose:
+        System.out.println("id: " + user.getId());
+        System.out.println("name: " + user.getName());
+        System.out.println("password: " + user.getPassword());
+        System.out.println("email: " + user.getEmail());
+         
+        return "users/signupSuccess";
+    }	
 }
+
